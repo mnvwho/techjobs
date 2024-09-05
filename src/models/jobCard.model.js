@@ -32,12 +32,6 @@ const jobCardSchema = new Schema({
         required: true,
         index: true,
     },
-    jobCategory: {
-        type: Schema.Types.ObjectId,
-        ref: 'JobCategory',
-        required: [true, 'Job_category is required!'],
-        index: true,
-    },
     companyId: {
         type: Schema.Types.ObjectId,
         ref: 'CompanyCard',

@@ -39,7 +39,7 @@ const employerCardSchema = new Schema ({
         type: String,
         trim: true,
         required: false,
-        default: 'default-cover-image.png',
+        default: '',
     },
     isActive: {
         type: Boolean,
@@ -48,6 +48,9 @@ const employerCardSchema = new Schema ({
     isLocked: {
         type: Boolean,
         default: false,
+    },
+    accessToken: {
+        type: String,
     },
     refreshToken: {
         type: String,
