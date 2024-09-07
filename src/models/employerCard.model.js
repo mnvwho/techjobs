@@ -1,5 +1,5 @@
 import mongoose, {Schema} from "mongoose";
-import bcrypt from "bcyrpt";
+import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken";
 
 const employerCardSchema = new Schema ({
