@@ -158,4 +158,4 @@ const applicantCardSchema = new Schema({
     timestamps: true,
   });
   
-  export const ApplicantCard = mongoose.model("ApplicantCard", applicantCardSchema);  
+  export const {ApplicantCard} = mongoose.model("ApplicantCard", applicantCardSchema);  

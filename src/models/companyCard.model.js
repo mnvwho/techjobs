@@ -63,4 +63,4 @@ const companyCardSchema = new Schema({
     timestamps: true 
 });
 
-export const CompanyCard = mongoose.model("CompanyCard", companyCardSchema);
+export const {CompanyCard} = mongoose.model("CompanyCard", companyCardSchema);

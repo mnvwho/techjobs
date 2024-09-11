@@ -57,4 +57,4 @@ const jobApplicationSchema = new Schema({
     timestamps: true, 
 });
 
-export const JobApplication = mongoose.model("JobApplication", jobApplicationSchema);
+export const {JobApplication} = mongoose.model("JobApplication", jobApplicationSchema);

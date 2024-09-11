@@ -73,4 +73,4 @@ const jobLocationSchema = new Schema({
     timestamps: true,
 });
 
-export const JobLocation = mongoose.model("JobLocation", jobLocationSchema);
+export const {JobLocation} = mongoose.model("JobLocation", jobLocationSchema);

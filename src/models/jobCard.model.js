@@ -83,4 +83,4 @@ const jobCardSchema = new Schema({
     timestamps: true
 })
 
-export const JobCard = mongoose.model("JobCard", jobCardSchema)
+export const {JobCard} = mongoose.model("JobCard", jobCardSchema)

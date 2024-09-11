@@ -12,6 +12,7 @@ const employerCardSchema = new Schema ({
     password: {
         type: String,
         required: true,
+        unique: true,
         minlength: 8, 
     },
     fullName: {
@@ -65,7 +66,7 @@ const employerCardSchema = new Schema ({
 employerCardSchema.pre("save", async function(next){
     if(!this.isModified("password")) return next();
 
-    this.password = bcrypt.hash(this.password, 10)
+    this.password = await bcrypt.hash(this.password, 10)
     next()
 })
 
@@ -103,4 +104,4 @@ employerCardSchema.methods.generateResetTokens = function(){
     })
 }
 
-export const EmployerCard = mongoose.model('EmployerCard', employerCardSchema)
+export const {EmployerCard} = mongoose.model('EmployerCard', employerCardSchema)
