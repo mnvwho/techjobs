@@ -16,7 +16,7 @@ app.use(cookieParser())
 
 import employerRouter from './routes/employer.routes.js'
 
-app.use("/api/v1/employer", employerRouter)
+app.use("/api/v1/employercards", employerRouter)
 
 console.log('Routes:', employerRouter);
 

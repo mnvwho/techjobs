@@ -2,7 +2,7 @@ import mongoose, {Schema} from "mongoose";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken";
 
-const employerCardSchema = new Schema ({
+const employerCardSchema = new mongoose.Schema ({
     username: {
         type: String,
         required: true,

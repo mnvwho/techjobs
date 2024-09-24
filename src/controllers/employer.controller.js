@@ -13,6 +13,9 @@ import {ApiError} from "../utils/ApiError.js"
 import { EmployerCard } from "../models/employerCard.model.js"
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
+import validator from 'validator';
+import zxcvbn from 'zxcvbn';
+
 // import jwt from "jsonwebtoken"
 // import mongoose from "mongoose"
 
@@ -27,24 +30,59 @@ const registerEmployer = asyncHandler (async (req, res) => {
         throw new ApiError(400, "All fields are required!")
     }
 
-const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+const usernamePattern = /^[a-zA-Z0-9]{3,20}$/;
+if (!usernamePattern.test(username)) {
+    throw new ApiError(400, "Username must be alphanumeric and between 3 to 20 characters!");
+}
 
-        if (!passwordPattern.test(password)) {
-        throw new ApiError(
-            400,
-            "Password is weak!"
-            );
-        }
+const normalizedUsername = username.toLowerCase();
 
-const existedEmployerCard = EmployerCard.findOne(username)
-        if (existedEmployerCard) {
-            throw new ApiError(400, "Employer already exists!")
-        }
+const existingUsername = await EmployerCard.findOne({ username: normalizedUsername });
 
-const employerAvatarLocalPath = req.files?.employerAvatar[0]?.path;
-const employerCoverImageLocalPath = req.files?.employerCoverImage[0]?.path;
+if (existingUsername) {
+    throw new ApiError(400, "Username is already taken! Please choose a different one.");
+}
 
-    if(!avatarLocalPath) {
+const existingEmployer = await EmployerCard.findOne({ 
+    username: normalizedUsername,
+    password
+});
+if (existingEmployer) {
+    throw new ApiError(400, "Employer already exists!");
+}
+
+const allowedRoles = ['admin', 'recruiter', 'hr', 'manager'];
+    if (!allowedRoles.includes(role)) {
+        throw new ApiError(400, `Invalid role. Allowed roles are: ${allowedRoles.join(", ")}`);
+    }
+
+    if (!validator.isStrongPassword(password, {
+        minLength: 8,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1
+    })) {
+        throw new ApiError(400, "Password is weak! It must be at least 8 characters long and contain uppercase, lowercase, a number, and a special character.");
+    }
+
+const passwordStrength = zxcvbn(password);
+
+    if (passwordStrength.score < 3) {
+        throw new ApiError(400, "Password is too weak! Please choose a stronger password.");
+    }
+
+// const existedEmployerCard = await EmployerCard.findOne({
+//     $or: [{ username }, { password }]
+//     })
+//     if (existedEmployerCard) {
+//         throw new ApiError(400, "Employer already exists!")
+//     }
+
+const employerAvatarLocalPath = req.files?.avatar[0]?.path;
+const employerCoverImageLocalPath = req.files?.coverImage[0]?.path;
+
+    if(!employerAvatarLocalPath) {
         throw new ApiError(400, "Avatar is required!")
     }
 
@@ -55,29 +93,16 @@ const employerCoverImage = await uploadOnCloudinary(employerCoverImageLocalPath)
         throw new ApiError(400, "Avatar is required!")
     }
 
-const isActive = true;
-const isLocked = false;
+// const isActive = true;
+// const isLocked = false;
 
-// const toggleAccountStatus = asyncHandler(async (req, res) => {
-//     const {employerId} = req.params;
-//     const {isActive, isLocked} = req.body;
+//     if (!employer.isActive) {
+//         throw new ApiError(403, "Account is inactive! Please contact support.");
+//     }
 
-    if (!employer) {
-        throw new ApiError(404, "Employer not found!")
-    }
-
-    if (typeof isActive !== "undefined") {
-        EmployerCard.isActive = isActive;
-    }
-
-    if (typeof isLocked !== "undefined") {
-        EmployerCard.isLocked = isLocked;
-    }
-
-    await employer.save();
-
-    res.status(200).json({message: "Employer account status updated successfully!", employer})
-// })
+//     if (employer.isLocked) {
+//         throw new ApiError(403, "Account is locked due to multiple failed login attempts! Please contact support.");
+//     }
 
 const employer = await EmployerCard.create({
     username: username.toLowerCase(),
@@ -85,14 +110,13 @@ const employer = await EmployerCard.create({
     fullName,
     role,
     employerAvatar: employerAvatar.url,
-    employercoverImage: employerCoverImage?.url || "",
+    employerCoverImage: employerCoverImage?.url || "",
     isActive,
     isLocked,
     })
 
-
 const createdEmployer = await EmployerCard.findById(employer._id).select(
-    "-password -refreshTocken"
+    "-password -refreshToken -resetToken"
     )
 
 return res.status(201).json(
